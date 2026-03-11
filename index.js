@@ -78,3 +78,96 @@ hashData();
 
 
 
+//Bearer Token Login Example//
+const loginButton = document.getElementById("login");
+const signupButton = document.getElementById("signup");
+const email = document.getElementById("email");
+const password = document.getElementById("password");
+const post = document.getElementById("post");
+
+async function login(url) {
+    const options = {
+        method: "POST",
+        body: JSON.stringify({email: email.value, password: password.value}),
+//This body in options variable is used when you are not wiring up buttons with a login/signup//        
+//        body: JSON.stringify({email:"potato@example.com", password:"password987"}),
+        headers: {"Content-Type": "application/json"},
+    }
+
+    try {
+       const res = await fetch(url, options);
+       console.log(res) 
+
+       if(!res.ok){
+        throw new Error("Error in fetch login logic");
+       }
+
+       const {token} = await res.json();
+       return token
+       //Token is an Object if the token key and the variable name match you can destructure that token out wrapping the word in{}//
+
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+async function readAllNotes(url, token) {
+    try {
+        const options = {
+            method: "GET", headers: {"Authorization": "Bearer " +token}
+        };
+        const res = await fetch(url, options)
+
+        if (!res.ok) {
+          throw new Error("Error in fetch login logic");
+        }
+        
+        const notes = await res.json();
+        return notes 
+    } catch (error) {
+        
+    }
+}
+
+async function main() {
+    try {
+        let token
+      loginButton.addEventListener("click", async() => {
+       token = await login("https://north-star-b834.onrender.com/auth/login");
+      const notes = await readAllNotes("https://north-star-b834.onrender.com/notes", token);
+      console.log(notes)
+      });
+//If you are on new website API you will NOT have any notes//
+//So if you use a signup button, doesn't do anything, will NOT return any information due to NO notes//
+      signupButton.addEventListener("click", async() => {
+       token = await login(
+        "https://north-star-b834.onrender.com/auth/register",
+      );
+      const notes = await readAllNotes("https://north-star-b834.onrender.com/notes", token); 
+      console.log(notes) 
+      });
+      console.log(token);
+
+//To add a third button you can see the token from the third button with you info//      
+      post.addEventListener("click", async()=> {
+        console.log(token)
+      })
+
+
+//These 2 const variables is used when you are not wiring up buttons with a login/signup//
+//      const jwt = await login(
+//        "https://north-star-b834.onrender.com/auth/login",
+//      );
+//      console.log(jwt);
+
+//      const notes = await readAllNotes(
+//        "https://north-star-b834.onrender.com/notes",
+//        jwt,
+//      );
+//      console.log(notes);
+    } catch (error) {
+        console.error(error) 
+    }
+}
+main();
+//End of Bearer Token Login Example//
